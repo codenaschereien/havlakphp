@@ -28,6 +28,11 @@ require('havlakloopfinder/HavlakLoopFinder.php');
 // Create 4 basic blocks, corresponding to and if/then/else clause
 // with a CFG that looks like a diamond
 function buildDiamond($start) {
+
+  if (!is_int($start)) {
+    throw new Exception('Invalid value given for parameter $start: ' . $start);
+  }
+
   global $cfg;
   $bb0 = $start;
   new BasicBlockEdge($cfg, $bb0, $bb0 + 1);
@@ -40,12 +45,25 @@ function buildDiamond($start) {
 
 // Connect two existing nodes
 function buildConnect($start, $end) {
+  if (!is_int($start)) {
+    throw new Exception('Invalid value given for parameter $start: ' . $start);
+  }
+  if (!is_int($end)) {
+    throw new Exception('Invalid value given for parameter $end: ' . $end);
+  }
+
   global $cfg;
   new BasicBlockEdge($cfg, $start, $end);
 }
 
 // Form a straight connected sequence of n basic blocks
 function buildStraight($start, $n) {
+  if (!is_int($start)) {
+    throw new Exception('Invalid value given for parameter $start: ' . $start);
+  }
+  if (!is_int($n)) {
+    throw new Exception('Invalid value given for parameter $end: ' . $n);
+  }
   for ($i = 0; $i < $n; $i++) {
     buildConnect($start + $i, $start + $i + 1);
   }
@@ -68,18 +86,18 @@ function buildBaseLoop($from) {
 }
 
 function getMem() {
-  $val = memory_get_usage() / 1024;
+  $val = memory_get_usage(true) / 1024;
   echo ' Total Memory: ' . $val . " KB\n";
 }
 
 
 $cfg = new CFG();
 $lsg = new LSG();
-$root = $cfg->createNode(0);
 
 echo "Welcome to LoopTesterApp, PHP edition\n";
 
 echo "Constructing App...\n";
+$root = $cfg->createNode(0);
 getMem();
 
 echo "Constructing Simple CFG...\n";

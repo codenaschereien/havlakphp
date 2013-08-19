@@ -78,6 +78,9 @@ class LSG {
   }
 
   public function calculateNestingLevelRec(SimpleLoop $loop, $depth) {
+    if (!is_int($depth)) {
+      throw new Exception('Invalid value given for parameter $depth: ' . $depth);
+    }
     $loop->setDepthLevel($depth);
     foreach ($loop->getChildren() as $liter) {
       $this->calculateNestingLevelRec($liter, $depth + 1);

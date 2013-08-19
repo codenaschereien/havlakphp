@@ -7,6 +7,10 @@ class CFG {
   private $edgeList = array();
 
   public function createNode($name) {
+    if (!is_int($name)) {
+      throw new Exception('Invalid value given for parameter $name: ' . $name);
+    }
+
     $node = null;
 
     if (!isset($this->basicBlockMap[$name]))  {
@@ -34,7 +38,7 @@ class CFG {
   }
 
   public function getNumNodes() {
-    return $this->numNodes;
+    return count($this->basicBlockMap);
   }
 
   public function getStartBasicBlock() {

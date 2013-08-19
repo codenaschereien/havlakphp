@@ -17,9 +17,14 @@ class UnionFindNode {
   // Initialize this node.
   //
   public function initNode(BasicBlock $bb, $dfsNumber) {
+    if(!is_int($dfsNumber)) {
+      throw new Exception('Invalid value given for parameter $dfsNumber: ' . $dfsNumber);
+    }
+
     $this->parent = $this;
     $this->bb = $bb;
     $this->dfsNumber = $dfsNumber;
+    $this->loop = null;
   }
 
   // Union/Find Algorithm - The find routine.
@@ -37,11 +42,11 @@ class UnionFindNode {
       if ($node->getParent() != $node->getParent()->getParent()) {
         $nodeList[] = $node;
       }
-        $node = $node->getParent();
-      }
+      $node = $node->getParent();
+    }
 
     // Path Compression, all nodes' parents point to the 1st level parent.
-    foreach ($nodeList as $iter)
+    foreach ($nodeList as &$iter)
       $iter->setParent($node->getParent());
 
     return $node;

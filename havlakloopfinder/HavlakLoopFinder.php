@@ -78,7 +78,13 @@ class HavlakLoopFinder {
   // for depth-first spanning trees. This is why DFS is the first
   // thing we run below.
   //
-  public function isAncestor($w, $v, array &$last) {
+  public function isAncestor($w, $v, SplFixedArray $last) {
+    if (!is_int($w)) {
+      throw new Exception('Invalid value given for parameter $w: ' . $w);
+    }
+    if (!is_int($v)) {
+      throw new Exception('Invalid value given for parameter $v: ' . $v);
+    }
     return (($w <= $v) && ($v <= $last[$w]));
   }
 
@@ -88,8 +94,12 @@ class HavlakLoopFinder {
   // DESCRIPTION:
   // Simple depth first traversal along out edges with node numbering.
   //
-  public function doDFS(BasicBlock $currentNode, array &$nodes, SplObjectStorage $number,
-            array &$last, $current) {
+  public function doDFS(BasicBlock $currentNode, SplFixedArray $nodes, SplObjectStorage $number,
+                        SplFixedArray $last, $current) {
+
+    if (!is_int($current)) {
+      throw new Exception('Invalid value given for parameter $current: ' . $current);
+    }
 
     $nodes[$current]->initNode($currentNode, $current);
     $number->attach($currentNode, $current);
@@ -122,12 +132,12 @@ class HavlakLoopFinder {
 
     self::$nonBackPreds = array();
     self::$backPreds = array();
-    self::$number->removeAll(self::$number);
+    self::$number = new SplObjectStorage(); //->removeAll(self::$number);
     if ($size > self::$maxSize) {
-      self::$header = array();
-      self::$type = array();
-      self::$last = array();
-      self::$nodes = array();
+      self::$header = new SplFixedArray($size); //array()
+      self::$type = new SplFixedArray($size); //array();
+      self::$last = new SplFixedArray($size); //array();
+      self::$nodes = new SplFixedArray($size); //array();
       self::$maxSize = $size;
     }
 
@@ -145,7 +155,6 @@ class HavlakLoopFinder {
     foreach ($this->cfg->getBasicBlocks() as $bbIter) {
       self::$number->attach($bbIter, self::UNVISITED);
     }
-
     $this->doDFS($this->cfg->getStartBasicBlock(), self::$nodes, self::$number, self::$last, 0);
 
     // Step b:
@@ -178,7 +187,7 @@ class HavlakLoopFinder {
           if ($this->isAncestor($w, $v, self::$last)) {
             self::$backPreds[$w][] = $v;
           } else {
-            self::$nonBackPreds[$w][] = $v;
+            self::$nonBackPreds[$w][$v] = $v;
           }
         }
       }
@@ -220,10 +229,11 @@ class HavlakLoopFinder {
       // Copy nodePool to workList.
       //
       $workList = new SplDoublyLinkedList();
-      foreach ($nodePool as $niter)
+      foreach ($nodePool as $niter) {
         $workList->push($niter);
+      }
 
-      if (count($nodePool) != 0) {
+      if ($nodePool->count() != 0) {
         self::$type[$w] = self::BB_REDUCIBLE;
       }
 
@@ -256,7 +266,7 @@ class HavlakLoopFinder {
 
           if (!$this->isAncestor($w, $ydash->getDfsNumber(), self::$last)) {
             self::$type[$w] = self::BB_IRREDUCIBLE;
-            self::$nonBackPreds[$w][] = $ydash->getDfsNumber();
+            self::$nonBackPreds[$w][$ydash->getDfsNumber()] = $ydash->getDfsNumber();
           } else {
             if ($ydash->getDfsNumber() != $w) {
               if (!$nodePool->contains($ydash)) {
@@ -271,8 +281,8 @@ class HavlakLoopFinder {
       // Collapse/Unionize nodes in a SCC to a single node
       // For every SCC found, create a loop descriptor and link it in.
       //
-      if (count($nodePool) > 0 || (self::$type[$w] == self::BB_SELF)) {
-          $loop = $this->lsg->createNewLoop();
+      if ($nodePool->count() > 0 || (self::$type[$w] == self::BB_SELF)) {
+        $loop = $this->lsg->createNewLoop();
 
         $loop->setHeader($nodeW);
         $loop->setIsReducible(self::$type[$w] != self::BB_IRREDUCIBLE);

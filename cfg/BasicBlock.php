@@ -14,6 +14,9 @@ class BasicBlock {
   }
 
   public function __construct($name) {
+    if (!is_int($name)) {
+      throw new Exception('Invalid value given for $name: ' . $name);
+    }
     $this->name = $name;
 
     ++self::$numBasicBlocks;

@@ -21,6 +21,14 @@ class BasicBlockEdge {
   public function getDst() { return $this->to; }
 
   public function __construct(CFG $cfg, $fromName, $toName) {
+    if (!is_int($fromName)) {
+      throw new Exception('Invalid value given for parameter $fromName: ' . $fromName);
+    }
+
+    if (!is_int($toName)) {
+      throw new Exception('Invalid value given for parameter $toName: ' . $toName);
+    }
+
     $this->from = $cfg->createNode($fromName);
     $this->to = $cfg->createNode($toName);
 

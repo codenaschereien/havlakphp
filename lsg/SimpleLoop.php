@@ -37,11 +37,11 @@ class SimpleLoop {
 
 
   public function addNode(BasicBlock $bb) {
-    $this->basicBlocks[] = $bb;
+    $this->basicBlocks[spl_object_hash($bb)] = $bb;
   }
 
   public function addChildLoop(SimpleLoop $loop) {
-    $this->children[] = $loop;
+    $this->children[spl_object_hash($loop)] = $loop;
   }
 
   public function dump($indent) {
@@ -96,7 +96,7 @@ class SimpleLoop {
   }
 
   public function setHeader(BasicBlock $bb) {
-    $this->basicBlocks[] = ($bb);
+    $this->basicBlocks[spl_object_hash($bb)] = $bb;
     $this->header = $bb;
   }
 
@@ -105,9 +105,15 @@ class SimpleLoop {
   }
 
   public function setCounter($value) {
+    if (!is_int($value)) {
+      throw new Exception('Invalid value given for parameter $value: ' . $value);
+    }
     $this->counter = $value;
   }
   public function setNestingLevel($level) {
+    if (!is_int($level)) {
+      throw new Exception('Invalid value given for parameter $level: ' . $level);
+    }
     $this->nestingLevel = $level;
     if ($level == 0) {
       $this->setIsRoot();
@@ -115,10 +121,16 @@ class SimpleLoop {
   }
 
   public function setDepthLevel($level) {
+    if (!is_int($level)) {
+      throw new Exception('Invalid value given for parameter $level: ' . $level);
+    }
     $this->depthLevel = $level;
   }
 
   public function setIsReducible($isReducible) {
+    if (!is_bool($isReducible)) {
+      throw new Exception('Invalid value given for parameter $isReducible: ' . $isReducible);
+    }
     $this->isReducible = $isReducible;
   }
 
